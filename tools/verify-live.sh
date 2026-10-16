@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-dev=${1:-/dev/v4l/by-id/usb-EMEET_EMEET_SmartCam_C60E_4K_Dual_A260808000902961-video-index0}
+find_camera() {
+    local d
+    for d in /sys/class/video4linux/video*; do
+        [ "$(cat "$d/index" 2>/dev/null)" = 0 ] || continue
+        [ "$(cat "$d/device/../idVendor" 2>/dev/null):$(cat "$d/device/../idProduct" 2>/dev/null)" = 328f:00e1 ] || continue
+        echo "/dev/$(basename "$d")"
+        return
+    done
+}
+dev=${1:-$(find_camera)}
+[ -n "$dev" ] || { echo "no camera with USB id 328f:00e1 found, pass the device as the first argument" >&2; exit 2; }
 command -v v4l2-ctl >/dev/null || { echo "v4l2-ctl not found (pacman -S v4l-utils)" >&2; exit 2; }
 
 read_zoom() { v4l2-ctl -d "$dev" --get-ctrl=zoom_absolute | awk -F': *' '{print $2}'; }

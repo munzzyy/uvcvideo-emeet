@@ -2,6 +2,10 @@
 
 A one-device quirk for the Linux uvcvideo driver so it sees changes the EMEET SmartCam C60E 4K (USB 328f:00e1) makes on its own, like the IR remote's zoom buttons.
 
+Licence: GPL-2.0-or-later, same as the kernel's uvcvideo files this is built from (see `LICENSE` and the SPDX line at the top of each source file). The module is loaded into the kernel, so only use builds you made from sources you have read.
+
+Targets: the EMEET C60E 4K Dual and a Linux kernel built from the v7.2.8 sources in `src/` (other cameras are untouched). Install: `make -C src`, then `sudo ./install.sh`, or DKMS (see below). Specific to the author's machine: the Arch Linux kernel it was built and tested against, and the companion `cameractrls-emeet` and `lark` projects that rely on live reads. Nothing in the repo is tied to one unit of the camera.
+
 ## Why
 
 The driver caches control values. It re-reads a control from the camera only if the control is flagged AUTO_UPDATE, or if the camera sends a status interrupt saying it changed. This camera's firmware clears AUTO_UPDATE in its GET_INFO answer and never sends the interrupt. So after the first read, `v4l2-ctl --get-ctrl=zoom_absolute` returns the cached value forever, even after the remote changed the real zoom.
@@ -102,6 +106,6 @@ sudo dkms install ./src
 - Setting the module parameter `quirks=` replaces this device's quirks, so it would turn the fix off.
 - The bundled sources are v7.2.8. On a much newer kernel they may stop compiling against its headers, and they would pin you to old driver code; rebase the patch onto that kernel's uvc files then.
 
-## Not verified
+## Verified
 
-The module was built and its metadata checked. It was not loaded, so the live behavior and the DKMS flow are untested.
+Built, loaded and read live on 7.2.8-arch1-2: with the module loaded, `zoom_absolute` follows the remote's step buttons. The DKMS flow is untested.
