@@ -31,6 +31,15 @@
  	{ USB_INTERFACE_INFO(USB_CLASS_VIDEO, 1, UVC_PC_PROTOCOL_15) },
 --- a/uvcvideo.h
 +++ b/uvcvideo.h
+@@ -48,7 +48,7 @@
+  * Driver specific constants.
+  */
+ 
+-#define DRIVER_VERSION		"1.1.1"
++#define DRIVER_VERSION		"1.1.1+emeet"
+ 
+ /* Number of isochronous URBs. */
+ #define UVC_URBS		5
 @@ -81,6 +81,7 @@
  #define UVC_QUIRK_INVALID_DEVICE_SOF	0x00010000
  #define UVC_QUIRK_MJPEG_NO_EOF		0x00020000

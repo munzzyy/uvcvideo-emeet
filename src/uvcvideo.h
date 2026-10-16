@@ -48,7 +48,7 @@
  * Driver specific constants.
  */
 
-#define DRIVER_VERSION		"1.1.1"
+#define DRIVER_VERSION		"1.1.1+emeet"
 
 /* Number of isochronous URBs. */
 #define UVC_URBS		5

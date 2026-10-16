@@ -4,7 +4,7 @@ A one-device quirk for the Linux uvcvideo driver so it sees changes the EMEET Sm
 
 Licence: GPL-2.0-or-later, same as the kernel's uvcvideo files this is built from (see `LICENSE` and the SPDX line at the top of each source file). The module is loaded into the kernel, so only use builds you made from sources you have read.
 
-Targets: the EMEET C60E 4K Dual and a Linux kernel built from the v7.2.8 sources in `src/` (other cameras are untouched). Install: `make -C src`, then `sudo ./install.sh`, or DKMS (see below). Specific to the author's machine: the Arch Linux kernel it was built and tested against, and the companion `cameractrls-emeet` and `lark` projects that rely on live reads. Nothing in the repo is tied to one unit of the camera.
+Targets: the EMEET C60E 4K Dual and a Linux kernel built from the v7.2.8 sources in `src/` (other cameras are untouched). Install: `make -C src`, then `sudo ./install.sh`, or `sudo ./dkms-install.sh` to have it rebuilt on every kernel update (see Kernel updates). Specific to the author's machine: the Arch Linux kernel it was built and tested against, and the companion `cameractrls-emeet` and `lark` projects that rely on live reads. Nothing in the repo is tied to one unit of the camera.
 
 ## Why
 
@@ -52,6 +52,15 @@ Also in `uvc-force-auto-update.patch`. Base is stable v7.2.8; pristine copies ar
  	{ USB_INTERFACE_INFO(USB_CLASS_VIDEO, 1, UVC_PC_PROTOCOL_15) },
 --- a/uvcvideo.h
 +++ b/uvcvideo.h
+@@ -48,7 +48,7 @@
+  * Driver specific constants.
+  */
+ 
+-#define DRIVER_VERSION		"1.1.1"
++#define DRIVER_VERSION		"1.1.1+emeet"
+ 
+ /* Number of isochronous URBs. */
+ #define UVC_URBS		5
 @@ -81,6 +81,7 @@
  #define UVC_QUIRK_INVALID_DEVICE_SOF	0x00010000
  #define UVC_QUIRK_MJPEG_NO_EOF		0x00020000
@@ -93,10 +102,13 @@ Without DKMS, a kernel update brings the stock driver back and the remote goes i
 
 ```
 sudo pacman -S dkms linux-headers
-sudo dkms install ./src
+sudo ./dkms-install.sh
+tools/verify-live.sh
 ```
 
-`src/dkms.conf` is package uvcvideo-emeet version 1.0, autoinstall on, destination `/updates`. Remove with `sudo dkms remove uvcvideo-emeet/1.0 --all`.
+dkms-install.sh registers `src/` as package uvcvideo-emeet 1.0 with autoinstall on, removes the copy install.sh left in `updates/` so there is one module for depmod to pick, builds, installs and reloads uvcvideo (close camera users first, as with install.sh). Remove it all with `sudo dkms remove uvcvideo-emeet/1.0 --all`.
+
+The module calls itself version `1.1.1+emeet`. The stock driver is `1.1.1`, and DKMS refuses to install a module that is not newer than the one already in the kernel tree. With the stock string, `dkms install` built the module and stopped there, and `dkms status` said only "built".
 
 ## Risks
 
@@ -108,4 +120,4 @@ sudo dkms install ./src
 
 ## Verified
 
-Built, loaded and read live on 7.2.8-arch1-2: with the module loaded, `zoom_absolute` follows the remote's step buttons. The DKMS flow is untested.
+Built, loaded and read live on 7.2.8-arch1-2 through install.sh: with the module loaded, `zoom_absolute` follows the remote's step buttons. DKMS built the module on the same kernel and refused the install while the version string matched the stock driver, which is what the suffix is for. dkms-install.sh end to end is the next thing to run here.
