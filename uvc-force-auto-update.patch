@@ -1,0 +1,41 @@
+--- a/uvc_ctrl.c
++++ b/uvc_ctrl.c
+@@ -2876,6 +2876,10 @@
+ 				UVC_CTRL_FLAG_AUTO_UPDATE : 0)
+ 			    |  (data[0] & UVC_CONTROL_CAP_ASYNCHRONOUS ?
+ 				UVC_CTRL_FLAG_ASYNCHRONOUS : 0);
++
++		if (dev->quirks & UVC_QUIRK_FORCE_AUTO_UPDATE &&
++		    info->flags & UVC_CTRL_FLAG_GET_CUR)
++			info->flags |= UVC_CTRL_FLAG_AUTO_UPDATE;
+ 	}
+ 
+ 	kfree(data);
+--- a/uvc_driver.c
++++ b/uvc_driver.c
+@@ -3270,6 +3270,15 @@
+ 	  .bInterfaceSubClass	= 1,
+ 	  .bInterfaceProtocol	= UVC_PC_PROTOCOL_UNDEFINED,
+ 	  .driver_info		= UVC_INFO_META(V4L2_META_FMT_D4XX) },
++	/* EMEET SmartCam C60E 4K: firmware clears AUTO_UPDATE and sends no status events */
++	{ .match_flags		= USB_DEVICE_ID_MATCH_DEVICE
++				| USB_DEVICE_ID_MATCH_INT_INFO,
++	  .idVendor		= 0x328f,
++	  .idProduct		= 0x00e1,
++	  .bInterfaceClass	= USB_CLASS_VIDEO,
++	  .bInterfaceSubClass	= 1,
++	  .bInterfaceProtocol	= UVC_PC_PROTOCOL_UNDEFINED,
++	  .driver_info		= UVC_INFO_QUIRK(UVC_QUIRK_FORCE_AUTO_UPDATE) },
+ 	/* Generic USB Video Class */
+ 	{ USB_INTERFACE_INFO(USB_CLASS_VIDEO, 1, UVC_PC_PROTOCOL_UNDEFINED) },
+ 	{ USB_INTERFACE_INFO(USB_CLASS_VIDEO, 1, UVC_PC_PROTOCOL_15) },
+--- a/uvcvideo.h
++++ b/uvcvideo.h
+@@ -81,6 +81,7 @@
+ #define UVC_QUIRK_INVALID_DEVICE_SOF	0x00010000
+ #define UVC_QUIRK_MJPEG_NO_EOF		0x00020000
+ #define UVC_QUIRK_MSXU_META		0x00040000
++#define UVC_QUIRK_FORCE_AUTO_UPDATE	0x00080000
+ 
+ /* Format flags */
+ #define UVC_FMT_FLAG_COMPRESSED		0x00000001
