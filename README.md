@@ -100,7 +100,7 @@ sudo dkms install ./src
 - It replaces the uvcvideo for every UVC camera, but only 328f:00e1 gets the quirk. Other cameras behave exactly as before.
 - Each control read now costs a USB control transfer (a few hundred bytes), instead of being served from the cache. Anything that polls many controls will generate more traffic.
 - Setting the module parameter `quirks=` replaces this device's quirks, so it would turn the fix off.
-- This is stable v7.2.8 code; a newer kernel needs the patch re-checked, not just rebuilt blindly (DKMS will fail the build loudly if it no longer applies cleanly to the headers).
+- The bundled sources are v7.2.8. On a much newer kernel they may stop compiling against its headers, and they would pin you to old driver code; rebase the patch onto that kernel's uvc files then.
 
 ## Not verified
 
