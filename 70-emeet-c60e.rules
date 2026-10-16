@@ -1,0 +1,3 @@
+# EMEET SmartCam C60E: let the logged-in user use the camera's HID channel and reset its USB port.
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="328f", ATTRS{idProduct}=="00e1", TAG+="uaccess"
+SUBSYSTEM=="usb", ATTR{idVendor}=="328f", ATTR{idProduct}=="00e1", TAG+="uaccess"
